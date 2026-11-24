@@ -361,9 +361,18 @@ The dashboard must be readable **at a glance by anyone, including elderly users*
 
 **Visual rules:**
 - Minimum body text 16px; key numbers 32–48px bold.
-- Verdict colors always paired with an icon + word (never color alone — for color-blind users).
+- **The app uses 3 main colors** (define them as CSS variables / Tailwind theme tokens and use nothing else for UI):
+
+  | Role | Name | Light | Dark mode | Used for |
+  |---|---|---|---|---|
+  | Primary (60%) | Mint White | `#F5F8F6` | `#0E1512` | Page background, cards (cards use pure white `#FFFFFF` / `#16201C`) |
+  | Secondary (30%) | Deep Olive Green | `#0F6B57` | `#4FC3A1` | Logo, buttons, links, active nav tab, score ring, headings accent |
+  | Accent (10%) | Date Gold | `#E0A526` | `#F2B941` | Highlights only: streaks, badges, "Healthy swap" button, tip card icon |
+
+  Text is near-black `#15201B` (light) / `#E6EEEA` (dark); muted text `#5B6B63` / `#9AABA3`.
+- **Verdict colors are status signals, not brand colors.** Use them only on verdict badges, the verdict card, traffic-light pills and the dashboard chart — always paired with an icon + word (never color alone, for color-blind users):
   - Good: green `#16A34A` · Moderate: amber `#D97706` · Avoid: red `#DC2626`
-- Neutral background (`#F8FAF9` light / `#0F1412` dark), white cards with a soft border, 16px radius, generous spacing (8-pt grid).
+- White cards with a soft border, 16px radius, generous spacing (8-pt grid).
 - Maximum 7 blocks on the screen; no tables on the dashboard.
 - Use Arabic-Indic or Western numerals based on the locale.
 - Support dark mode via `prefers-color-scheme` and a toggle.
