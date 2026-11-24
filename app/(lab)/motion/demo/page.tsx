@@ -14,7 +14,7 @@ export default async function TransitionDemoPage({ searchParams }: { searchParam
   const info = TRANSITION_INFO[type];
 
   return (
-    <Page className="max-w-[640px]">
+    <Page width="narrow">
       <TransitionLink href="/motion" transition="back" className="press -my-2 flex min-h-12 items-center gap-1 self-start text-muted">
         <ChevronRight size={20} aria-hidden />
         مختبر الحركة

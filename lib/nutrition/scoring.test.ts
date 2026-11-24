@@ -79,7 +79,22 @@ describe("scoreFood", () => {
   it("treats unknown nutrition as unknown, not as zero", () => {
     const r = scoreFood(food({}), healthy);
     expect(r.levels.sugar).toBeNull();
-    expect(r.reasons).toHaveLength(0);
+    expect(r.verdict).toBe("moderate");
+    expect(r.reasons.map((x) => x.key)).toEqual(["nutrition_unknown"]);
+  });
+
+  it("penalizes milk for lactose intolerance without a hard stop", () => {
+    const milk = food({ sugarG: 4.7, fatG: 3.3, satFatG: 2.1, saltG: 0.1 }, { isDrink: true, allergens: ["milk"] });
+    const r = scoreFood(milk, { ...healthy, conditions: ["lactose_intolerance"] });
+    expect(r.reasons[0].key).toBe("lactose");
+    expect(r.score).toBeGreaterThan(10);
+  });
+
+  it("treats PCOS and prediabetes as sugar-sensitive", () => {
+    const sweet = food({ sugarG: 25 });
+    const base = scoreFood(sweet, healthy).score;
+    expect(scoreFood(sweet, { ...healthy, conditions: ["pcos"] }).score).toBeLessThan(base);
+    expect(scoreFood(sweet, { ...healthy, conditions: ["prediabetes"] }).score).toBeLessThan(base);
   });
 });
 

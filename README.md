@@ -28,13 +28,27 @@ Landing ─► Sign up (Clerk) ─► Health profile (3 steps) ─► Dashboard
 |---|---|---|---|
 | Landing | `/` | Marketing | Logo, promise, how it works, example verdict |
 | Sign in / up | `/sign-in`, `/sign-up` | Auth form | Clerk, in Arabic, brand colors |
-| Onboarding | `/onboarding` | Form | Name and body info → conditions and allergies → goal and diet |
-| Dashboard | `/dashboard` | Dashboard | Weekly score ring, 3 stat tiles, 7-day chart, daily tip, weekly goal, last 5 scans |
-| Scan | `/scan` | Form | Photo (camera or gallery) or barcode (live camera or typed) |
+| Onboarding | `/onboarding` | Form | Step 2 of sign-up: you → body and activity → conditions and allergies → goal and diet |
+| Home | `/dashboard` | Dashboard | Weekly score ring, verdict bubbles + % bars, daily score bars, tip, weekly goal, last 5 scans |
+| My health | `/health` | Dashboard | Weight, height, age, daily burn; BMI gauge; daily calories and limits (sugar, salt, sat fat, fiber, protein, water); conditions; nutrient range bars; category donut |
+| Scan | `/scan` | Form | Barcode, whole product photo, label (nutrition table and/or ingredients), or ingredients only |
 | Result | `/product/[id]` | Detail | Verdict, why, sugar teaspoons, traffic lights, alternative, details |
 | History | `/history` | List | Search, verdict filter, paginated list |
 | Profile | `/profile` | Settings | Health profile, sign out, delete my data |
 | Motion Lab | `/motion` | — | A play button for every animation and page transition (public) |
+| Preview | `/preview` | — | Home, My health and Scan with sample data, no account needed (public) |
+
+## Design
+
+- **Colors:** ink black `#11151C`, deep space blue `#212D40`, charcoal blue `#364156`. Verdict colors are used only for status.
+- **Liquid glass:** every card, chip and the floating tab bar use `.glass` (blur, 1px light edge, top highlight, opaque fallback).
+- **Type:** Readex Pro for big titles, IBM Plex Sans Arabic for text, Space Grotesk for numbers, IBM Plex Mono for code labels.
+- **Charts:** score ring, verdict bubbles, pill bars, BMI gauge, range (bullet) bars, category donut — plain SVG and CSS, no chart library.
+- **Responsive:** phones and tablets use a floating glass tab bar; from 1024px a side menu. Layouts are checked at 375, 768 and 1280px with no sideways scrolling.
+
+## My health numbers
+
+`lib/health/metrics.ts` (tested): BMI with WHO bands, resting energy with Mifflin–St Jeor, daily burn by activity level, a calorie target for the goal (−500 kcal to lose weight, never below 1200/1500, never a deficit in pregnancy), and daily limits: free sugar <10% of energy (5% with diabetes, prediabetes, PCOS or fatty liver), salt 5 g (3.75 g with high blood pressure, kidney or heart disease), saturated fat <10% (6% with cholesterol or heart disease), fiber 14 g per 1000 kcal, protein 0.8 g/kg (1.6 to build muscle), water 35 ml/kg.
 
 ## The scoring engine
 
@@ -72,7 +86,7 @@ cp .env.example .env.local
 
 1. Create a project at [supabase.com](https://supabase.com).
 2. Go to **Authentication → Sign In / Providers → Third-Party Auth**, add **Clerk**, and paste the Clerk domain.
-3. Open the **SQL editor** and run `supabase/migrations/0001_init.sql`, then `supabase/seed.sql`.
+3. Open the **SQL editor** and run `supabase/migrations/0001_init.sql`, `supabase/migrations/0002_health_profile.sql`, then `supabase/seed.sql`.
 4. Copy the project URL, anon key and service-role key into `.env.local`.
 
 ### 4. Anthropic (photo reading)

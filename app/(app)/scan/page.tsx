@@ -7,8 +7,8 @@ export const metadata: Metadata = { title: "افحص منتج" };
 /** Pattern: Form — one task: capture a photo or a barcode. */
 export default function ScanPage() {
   return (
-    <Page className="max-w-[640px]">
-      <PageHeader title="افحص منتج" description="صوّر أي أكل أو منتج، ونخبرك إذا كان مناسباً لك." />
+    <Page width="narrow">
+      <PageHeader title="ماذا تفحص؟" description="اختر الطريقة: باركود، المنتج كاملاً، الملصق، أو المكونات." />
       <ScanFlow />
     </Page>
   );

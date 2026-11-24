@@ -62,7 +62,7 @@ export default async function HistoryPage({ searchParams }: { searchParams: Prom
             type="search"
             defaultValue={query}
             placeholder="ابحث باسم المنتج"
-            className="min-h-12 w-full rounded-control border border-charcoal bg-space ps-12 pe-4"
+            className="min-h-12 w-full glass rounded-full ps-12 pe-4"
           />
         </form>
         <nav aria-label="تصفية حسب الحكم" className="flex flex-wrap gap-2">
@@ -71,8 +71,8 @@ export default async function HistoryPage({ searchParams }: { searchParams: Prom
               key={f.label}
               href={href({ v: f.value })}
               aria-current={f.value === verdict ? "page" : undefined}
-              className={`press flex min-h-12 items-center rounded-control px-4 font-semibold ${
-                f.value === verdict ? "bg-fg text-ink" : "border border-charcoal bg-space text-fg"
+              className={`press flex min-h-12 items-center rounded-full px-5 font-semibold ${
+                f.value === verdict ? "bg-fg text-ink" : "glass text-fg"
               }`}
             >
               {f.label}
@@ -90,7 +90,7 @@ export default async function HistoryPage({ searchParams }: { searchParams: Prom
                 امسح البحث والتصفية
               </Link>
             ) : (
-              <TransitionLink href="/scan" transition="rise" className="press flex min-h-12 items-center rounded-control bg-fg px-6 font-semibold text-ink">
+              <TransitionLink href="/scan" transition="rise" className="press flex min-h-12 items-center rounded-full bg-fg px-6 font-semibold text-ink">
                 افحص أول منتج
               </TransitionLink>
             )}
@@ -98,11 +98,11 @@ export default async function HistoryPage({ searchParams }: { searchParams: Prom
         ) : (
           <ul className="anim-stagger">
             {rows.map((scan, i) => (
-              <li key={scan.id} className={i > 0 ? "border-t border-charcoal" : ""}>
+              <li key={scan.id} className={i > 0 ? "border-t border-fg/10" : ""}>
                 <TransitionLink
                   href={`/product/${scan.product.id}`}
                   transition="forward"
-                  className="flex min-h-[72px] items-center gap-3 px-5 py-3 hover:bg-charcoal/40"
+                  className="flex min-h-[72px] items-center gap-3 px-5 py-3 hover:bg-fg/5"
                 >
                   <ProductIcon category={scan.product.category} />
                   <span className="flex min-w-0 flex-1 flex-col">
@@ -135,10 +135,10 @@ export default async function HistoryPage({ searchParams }: { searchParams: Prom
 
 /** Disabled pagination keeps its readable label (list pattern rule). */
 function PagerLink({ href, disabled, children }: { href: string; disabled: boolean; children: React.ReactNode }) {
-  const cls = "flex min-h-12 items-center rounded-control border border-charcoal px-5 font-semibold";
+  const cls = "flex min-h-12 items-center glass rounded-full px-5 font-semibold";
   if (disabled) return <span className={`${cls} text-muted`} aria-disabled="true">{children}</span>;
   return (
-    <Link href={href} className={`press ${cls} bg-space`}>
+    <Link href={href} className={`press ${cls}`}>
       {children}
     </Link>
   );

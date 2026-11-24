@@ -27,7 +27,7 @@ export function DeleteDataButton() {
       <dialog
         ref={dialogRef}
         aria-labelledby="delete-title"
-        className="anim-pop m-auto w-[min(440px,calc(100vw-32px))] rounded-card border border-charcoal bg-space p-6 text-fg backdrop:bg-ink/80"
+        className="anim-pop m-auto w-[min(440px,calc(100vw-32px))] glass rounded-card p-6 text-fg backdrop:bg-ink/80"
       >
         <h2 id="delete-title" className="text-xl font-semibold">
           حذف بياناتك نهائياً؟
@@ -42,7 +42,7 @@ export function DeleteDataButton() {
           >
             {pending ? "جارٍ الحذف…" : "احذف الملف والفحوصات"}
           </button>
-          <button type="button" autoFocus onClick={() => dialogRef.current?.close()} className="press min-h-12 rounded-control border border-charcoal px-5 font-semibold">
+          <button type="button" autoFocus onClick={() => dialogRef.current?.close()} className="press min-h-12 glass rounded-full px-5 font-semibold">
             إلغاء
           </button>
         </div>

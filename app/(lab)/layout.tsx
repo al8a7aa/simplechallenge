@@ -9,7 +9,7 @@ import { LogoMark } from "@/components/brand/Logo";
 export default function LabLayout({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-dvh">
-      <header className="border-b border-charcoal bg-space">
+      <header className="glass-strong rounded-none border-x-0 border-t-0">
         <div className="mx-auto flex max-w-[1040px] items-center justify-between gap-4 px-4 py-2 md:px-12">
           <Link href="/" className="flex min-h-12 items-center gap-3 font-semibold">
             <LogoMark size={40} />

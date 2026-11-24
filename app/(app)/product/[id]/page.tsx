@@ -36,7 +36,7 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
   const VerdictIcon = VERDICT_ICON[result.verdict];
 
   return (
-    <Page className="max-w-[720px]">
+    <Page width="medium">
       <TransitionLink href="/history" transition="back" className="press -my-2 flex min-h-12 items-center gap-1 self-start text-muted">
         <ChevronRight size={20} aria-hidden />
         السجل
@@ -49,7 +49,7 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
             <ProductIcon category={product.category} size={32} />
             <span className="truncate">{product.name_ar}</span>
           </p>
-          <h1 id="verdict" className={`flex items-center gap-2 text-[32px] font-semibold leading-tight ${VERDICT_TEXT[result.verdict]}`}>
+          <h1 id="verdict" className={`flex items-center gap-2 font-display text-[36px] font-normal leading-tight ${VERDICT_TEXT[result.verdict]}`}>
             <VerdictIcon size={34} aria-hidden />
             {verdictLabel[result.verdict]}
           </h1>
@@ -85,7 +85,7 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
         <h2 id="lights" className="mb-3 text-lg font-semibold">
           لكل 100 {product.is_drink ? "مل" : "غ"}
         </h2>
-        <dl className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <dl className="grid grid-cols-2 gap-2.5 sm:grid-cols-4">
           <Light label="السكر" value={product.sugar_g} level={result.levels.sugar} />
           <Light label="الدهون" value={product.fat_g} level={result.levels.fat} />
           <Light label="الدهون المشبعة" value={product.sat_fat_g} level={result.levels.satFat} />
@@ -116,7 +116,7 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
       {/* 6. Details, collapsed. */}
       <Details product={product} />
 
-      <TransitionLink href="/scan" transition="rise" className="press flex min-h-12 items-center justify-center gap-2 rounded-control border border-charcoal bg-space font-semibold">
+      <TransitionLink href="/scan" transition="rise" className="press glass flex min-h-14 items-center justify-center gap-2 rounded-full font-semibold">
         <ScanBarcode size={20} aria-hidden />
         افحص منتجاً آخر
       </TransitionLink>
@@ -146,9 +146,9 @@ const LEVEL_STYLE: Record<Level, { text: string; Icon: typeof CircleCheck }> = {
 function Light({ label, value, level }: { label: string; value: number | null; level: Level | null }) {
   const style = level ? LEVEL_STYLE[level] : null;
   return (
-    <div className="flex flex-col gap-1 rounded-control bg-ink p-3">
+    <div className="flex flex-col gap-1 well rounded-control p-3">
       <dt className="text-sm text-muted">{label}</dt>
-      <dd className="text-xl font-semibold">{value === null ? "—" : `${Number(value)} غ`}</dd>
+      <dd className="font-num text-2xl">{value === null ? "—" : Number(value)}<span className="ms-1 text-sm text-muted">{value === null ? "" : "غ"}</span></dd>
       <dd className={`inline-flex items-center gap-1 text-sm font-semibold ${style?.text ?? "text-muted"}`}>
         {style && <style.Icon size={16} aria-hidden />}
         {level ? levelLabel[level] : "غير معروف"}
@@ -171,7 +171,7 @@ function SugarTeaspoons({ product }: { product: ProductRow }) {
   return (
     <Card className="flex flex-col gap-3 p-5">
       <p className="text-lg">
-        <span className="text-[28px] font-semibold">≈ {spoons}</span> ملاعق صغيرة من السكر
+        <span className="font-num text-[40px] leading-none">≈ {spoons}</span> ملاعق صغيرة من السكر
         <span className="text-muted"> {portion ? `في ${kind(product)} كاملة (${portion} ${unit})` : `في كل 100 ${unit}`}</span>
       </p>
       <div className="flex flex-wrap gap-1.5" aria-hidden>
@@ -205,7 +205,7 @@ function Details({ product }: { product: ProductRow }) {
           <caption className="sr-only">القيم الغذائية لكل 100 {product.is_drink ? "مل" : "غ"}</caption>
           <tbody>
             {rows.map(([label, value, unit]) => (
-              <tr key={label} className="border-t border-charcoal">
+              <tr key={label} className="border-t border-fg/10">
                 <th scope="row" className="py-2.5 text-start font-normal text-muted">
                   {label}
                 </th>

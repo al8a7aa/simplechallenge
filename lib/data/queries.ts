@@ -74,6 +74,8 @@ export interface DaySummary {
   good: number;
   moderate: number;
   avoid: number;
+  /** Average score that day, or null with no scans. */
+  score: number | null;
 }
 
 export interface WeekSummary {
@@ -118,6 +120,7 @@ export async function getWeekSummary(now = new Date()): Promise<WeekSummary> {
     });
     return {
       label: day.toLocaleDateString("ar", { weekday: "short" }),
+      score: inDay.length ? Math.round(inDay.reduce((s, r) => s + r.score, 0) / inDay.length) : null,
       good: inDay.filter((r) => r.verdict === "good").length,
       moderate: inDay.filter((r) => r.verdict === "moderate").length,
       avoid: inDay.filter((r) => r.verdict === "avoid").length,
@@ -144,6 +147,47 @@ export async function getWeekSummary(now = new Date()): Promise<WeekSummary> {
     scoreDelta: score !== null && prev !== null ? score - prev : null,
     days,
     topAvoidCategory,
+  };
+}
+
+export interface WeekNutrition {
+  /** Average per 100 g (or 100 ml) across products scanned in the last 7 days. */
+  averages: { sugarG: number | null; saltG: number | null; satFatG: number | null; fatG: number | null; fiberG: number | null };
+  /** How many scans per category, most first. */
+  categories: { category: string; count: number }[];
+  total: number;
+}
+
+/** What was in the food the user scanned this week (for the My health page). */
+export async function getWeekNutrition(now = new Date()): Promise<WeekNutrition> {
+  const db = await createServerSupabase();
+  const since = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 6);
+  const { data, error } = await db
+    .from("scans")
+    .select("product:products!scans_product_id_fkey(category, sugar_g, salt_g, sat_fat_g, fat_g, fiber_g)")
+    .gte("created_at", since.toISOString());
+  if (error) throw error;
+
+  type P = { category: string; sugar_g: number | null; salt_g: number | null; sat_fat_g: number | null; fat_g: number | null; fiber_g: number | null };
+  const products = ((data ?? []) as unknown as { product: P | null }[]).map((r) => r.product).filter((p): p is P => p !== null);
+
+  const avg = (pick: (p: P) => number | null) => {
+    const values = products.map(pick).filter((v): v is number => v !== null).map(Number);
+    return values.length ? Math.round((values.reduce((s, v) => s + v, 0) / values.length) * 10) / 10 : null;
+  };
+  const counts = new Map<string, number>();
+  for (const p of products) counts.set(p.category, (counts.get(p.category) ?? 0) + 1);
+
+  return {
+    averages: {
+      sugarG: avg((p) => p.sugar_g),
+      saltG: avg((p) => p.salt_g),
+      satFatG: avg((p) => p.sat_fat_g),
+      fatG: avg((p) => p.fat_g),
+      fiberG: avg((p) => p.fiber_g),
+    },
+    categories: [...counts.entries()].map(([category, count]) => ({ category, count })).sort((a, b) => b.count - a.count),
+    total: products.length,
   };
 }
 

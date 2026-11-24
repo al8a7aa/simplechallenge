@@ -4,6 +4,7 @@
  */
 
 import type {
+  ActivityLevel,
   Allergen,
   Category,
   Condition,
@@ -55,6 +56,8 @@ export interface ProfileRow {
   height_cm: number | null;
   weight_kg: number | null;
   goal: Goal;
+  activity_level: ActivityLevel;
+  target_weight_kg: number | null;
   conditions: Condition[];
   allergies: Allergen[];
   diet_prefs: DietPref[];

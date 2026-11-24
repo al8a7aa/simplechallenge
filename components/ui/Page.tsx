@@ -1,11 +1,14 @@
 import type { ReactNode } from "react";
 
 /**
- * Page content container: capped at 1040px and centered, with a 16px gutter
- * on phones. Only page content is capped, never the app shell.
+ * Page content container, centered, with a 16px gutter on phones.
+ * Only page content is capped, never the app shell:
+ *   narrow 640px (single task) · medium 760px (detail, settings) · wide 1040px.
  */
-export function Page({ children, className = "" }: { children: ReactNode; className?: string }) {
-  return <main className={`mx-auto flex w-full max-w-[1040px] flex-col gap-6 px-4 py-6 md:px-12 md:py-10 ${className}`}>{children}</main>;
+const WIDTH = { narrow: "max-w-[640px]", medium: "max-w-[760px]", wide: "max-w-[1040px]" } as const;
+
+export function Page({ children, width = "wide", className = "" }: { children: ReactNode; width?: keyof typeof WIDTH; className?: string }) {
+  return <main className={`mx-auto flex w-full ${WIDTH[width]} flex-col gap-5 px-4 py-6 sm:px-6 md:gap-6 md:px-10 md:py-10 ${className}`}>{children}</main>;
 }
 
 /** Page heading block: title plus an optional one-line description. */
@@ -13,7 +16,7 @@ export function PageHeader({ title, description, action }: { title: string; desc
   return (
     <header className="flex flex-wrap items-end justify-between gap-4">
       <div className="flex min-w-0 flex-col gap-1">
-        <h1 className="text-[28px] font-semibold leading-tight md:text-[32px]">{title}</h1>
+        <h1 className="font-display text-[40px] leading-[1.05] font-normal md:text-[48px]">{title}</h1>
         {description && <p className="text-muted">{description}</p>}
       </div>
       {action}

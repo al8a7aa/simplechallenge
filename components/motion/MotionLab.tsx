@@ -8,7 +8,7 @@ import { SplashScreen } from "@/components/brand/SplashScreen";
 import { ScoreRing } from "@/components/ui/ScoreRing";
 import { VerdictBadge } from "@/components/ui/verdict";
 import { WeeklyChart } from "@/components/ui/WeeklyChart";
-import type { DaySummary } from "@/lib/data/queries";
+import { SAMPLE_DAYS } from "@/lib/demo/sample";
 import { TRANSITION_INFO, TRANSITIONS } from "@/lib/motion/transitions";
 import { TransitionLink } from "./TransitionLink";
 import { useReplay } from "./useReplay";
@@ -19,15 +19,6 @@ import { useReplay } from "./useReplay";
  * The animations themselves live in app/globals.css (section 3–5).
  */
 
-const SAMPLE_DAYS: DaySummary[] = [
-  { label: "سبت", good: 2, moderate: 1, avoid: 1 },
-  { label: "أحد", good: 3, moderate: 0, avoid: 0 },
-  { label: "إثنين", good: 1, moderate: 2, avoid: 1 },
-  { label: "ثلاثاء", good: 2, moderate: 1, avoid: 0 },
-  { label: "أربعاء", good: 1, moderate: 1, avoid: 1 },
-  { label: "خميس", good: 2, moderate: 0, avoid: 0 },
-  { label: "جمعة", good: 1, moderate: 1, avoid: 0 },
-];
 
 export function MotionLab() {
   const reducedMotion = useReducedMotion();
@@ -36,7 +27,7 @@ export function MotionLab() {
   return (
     <div className="flex flex-col gap-10">
       {reducedMotion && (
-        <p role="status" className="rounded-card border border-moderate/60 bg-space p-4">
+        <p role="status" className="glass rounded-card border-moderate/60 p-4">
           جهازك يطلب تقليل الحركة، لذلك تظهر الحركات هنا بحالتها النهائية مباشرة. أوقف «تقليل الحركة» في إعدادات الجهاز لمشاهدتها.
         </p>
       )}
@@ -48,7 +39,7 @@ export function MotionLab() {
           when="عند فتح التطبيق: ترسم العربة نفسها، تظهر العجلات والورقة، ثم علامة الصح والاسم."
           duration="1.9s"
           extra={
-            <button type="button" onClick={replaySplash} className="press flex min-h-12 items-center gap-2 rounded-control border border-charcoal px-4 font-semibold">
+            <button type="button" onClick={replaySplash} className="press flex min-h-12 items-center gap-2 glass rounded-full px-4 font-semibold">
               <Play size={18} aria-hidden />
               شغّل بملء الشاشة
             </button>
@@ -71,7 +62,7 @@ export function MotionLab() {
               key={t}
               href={`/motion/demo?t=${t}`}
               transition={t}
-              className="press flex min-h-24 flex-col justify-center gap-1 rounded-card border border-charcoal bg-space p-4 hover:border-fg"
+              className="press flex min-h-24 flex-col justify-center gap-1 glass rounded-card p-4 hover:border-fg"
             >
               <span className="flex items-center justify-between gap-2 font-semibold">
                 {TRANSITION_INFO[t].name}
@@ -94,7 +85,7 @@ export function MotionLab() {
             when="بطاقة النتيجة بعد الفحص"
             duration="300ms"
             render={(key) => (
-              <div key={key} className="anim-pop flex h-36 items-center justify-center rounded-control bg-ink">
+              <div key={key} className="anim-pop flex h-36 items-center justify-center well rounded-control">
                 <VerdictBadge verdict="good" long size="lg" />
               </div>
             )}
@@ -129,7 +120,7 @@ export function MotionLab() {
             render={(key) => (
               <ul key={key} className="anim-stagger flex flex-col gap-2">
                 {["لبن قليل الدسم", "مشروب غازي", "بسكويت بالشوكولاتة"].map((name) => (
-                  <li key={name} className="rounded-control bg-ink px-4 py-3">
+                  <li key={name} className="well rounded-control px-4 py-3">
                     {name}
                   </li>
                 ))}
@@ -144,7 +135,7 @@ export function MotionLab() {
             render={(key) => (
               <div key={key} className="flex h-24 flex-col justify-center gap-2">
                 <span className="text-sm text-muted">3 من 4</span>
-                <div className="h-2.5 overflow-hidden rounded-full bg-charcoal">
+                <div className="h-2.5 overflow-hidden rounded-full bg-fg/10">
                   <div className="anim-grow-x h-full w-3/4 rounded-full bg-fg" />
                 </div>
               </div>
@@ -170,7 +161,7 @@ export function MotionLab() {
             when="صورة غير مقروءة أو باركود غير صحيح"
             duration="300ms"
             render={(key) => (
-              <p key={key} className={`${key ? "anim-shake" : ""} rounded-control border border-avoid/60 bg-ink p-4`}>
+              <p key={key} className={`${key ? "anim-shake" : ""} well rounded-control border border-avoid/60 p-4`}>
                 لم نتمكن من قراءة الصورة. صوّر من جديد في إضاءة أفضل.
               </p>
             )}
@@ -181,7 +172,7 @@ export function MotionLab() {
             when="أثناء تحليل الصورة وقراءة الباركود"
             duration="1.6s متكرر"
             render={() => (
-              <div className="relative h-36 overflow-hidden rounded-control bg-ink [container-type:size]">
+              <div className="relative h-36 overflow-hidden well rounded-control [container-type:size]">
                 <div className="anim-scanline absolute inset-x-[12%] top-[10%] h-0.5 bg-fg" style={{ ["--travel" as string]: "80cqh" }} />
               </div>
             )}
@@ -208,7 +199,7 @@ export function MotionLab() {
             duration="100ms"
             render={() => (
               <div className="flex h-24 items-center justify-center">
-                <button type="button" className="press min-h-12 rounded-control bg-fg px-6 font-semibold text-ink">
+                <button type="button" className="press min-h-12 rounded-full bg-fg px-6 font-semibold text-ink">
                   اضغط مطوّلاً
                 </button>
               </div>
@@ -253,7 +244,7 @@ function Demo({
 }) {
   const [key, replay] = useReplay();
   return (
-    <article className="flex flex-col gap-4 rounded-card border border-charcoal bg-space p-5">
+    <article className="flex flex-col gap-4 glass rounded-card p-5">
       <header className="flex flex-wrap items-start justify-between gap-2">
         <div className="min-w-0">
           <h3 className="font-semibold">{title}</h3>
@@ -266,7 +257,7 @@ function Demo({
       </header>
       <div>{render(key)}</div>
       <div className="flex flex-wrap gap-2">
-        <button type="button" onClick={replay} className="press flex min-h-12 items-center gap-2 rounded-control bg-fg px-4 font-semibold text-ink">
+        <button type="button" onClick={replay} className="press flex min-h-12 items-center gap-2 rounded-full bg-fg px-4 font-semibold text-ink">
           <RotateCcw size={18} aria-hidden />
           شغّل
         </button>
@@ -284,9 +275,9 @@ function ToastDemo() {
       when="تأكيد قصير: «تم حفظ البديل»"
       duration="3.2s"
       render={(key) => (
-        <div className="flex h-28 items-end justify-center overflow-hidden rounded-control bg-ink pb-3">
+        <div className="flex h-28 items-end justify-center overflow-hidden well rounded-control pb-3">
           {key > 0 ? (
-            <p key={key} role="status" className="anim-toast flex items-center gap-2 rounded-control border border-charcoal bg-space px-4 py-3 font-semibold">
+            <p key={key} role="status" className="anim-toast flex items-center gap-2 glass rounded-full px-4 py-3 font-semibold">
               <Check size={18} className="text-good" aria-hidden />
               تم حفظ البديل
             </p>
@@ -315,12 +306,12 @@ function SheetDemo() {
 function SheetPreview({ initiallyOpen }: { initiallyOpen: boolean }) {
   const [open, setOpen] = useState(initiallyOpen);
   return (
-    <div className="relative flex h-48 items-start overflow-hidden rounded-control bg-ink p-4">
+    <div className="relative flex h-48 items-start overflow-hidden well rounded-control p-4">
       <p className="text-sm text-muted">اضغط «شغّل» لفتح اللوحة</p>
       {open && (
         <>
           <div className="anim-fade absolute inset-0 bg-ink/70" onClick={() => setOpen(false)} aria-hidden />
-          <div role="dialog" aria-label="لوحة تجريبية" className="anim-sheet absolute inset-x-0 bottom-0 rounded-t-card border-t border-charcoal bg-space p-4">
+          <div role="dialog" aria-label="لوحة تجريبية" className="anim-sheet absolute inset-x-0 bottom-0 glass-strong rounded-t-card p-4">
             <div className="flex items-center justify-between">
               <span className="font-semibold">تصفية حسب الحكم</span>
               <button type="button" onClick={() => setOpen(false)} className="press flex min-h-12 items-center gap-1.5 rounded-control px-3 font-semibold">

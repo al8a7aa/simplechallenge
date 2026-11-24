@@ -7,11 +7,15 @@
 
 export const CONDITIONS = [
   "diabetes",
+  "prediabetes",
   "hypertension",
   "high_cholesterol",
-  "celiac",
-  "kidney",
   "heart",
+  "kidney",
+  "fatty_liver",
+  "pcos",
+  "celiac",
+  "lactose_intolerance",
   "pregnancy",
 ] as const;
 export type Condition = (typeof CONDITIONS)[number];
@@ -34,6 +38,9 @@ export type DietPref = (typeof DIET_PREFS)[number];
 
 export const GOALS = ["lose_weight", "maintain", "gain_muscle", "eat_healthier"] as const;
 export type Goal = (typeof GOALS)[number];
+
+export const ACTIVITY_LEVELS = ["sedentary", "light", "moderate", "active", "very_active"] as const;
+export type ActivityLevel = (typeof ACTIVITY_LEVELS)[number];
 
 export const CATEGORIES = [
   "drinks",
@@ -105,6 +112,8 @@ export interface Reason {
 export type ReasonKey =
   | "allergen"
   | "gluten_celiac"
+  | "lactose"
+  | "nutrition_unknown"
   | "not_halal"
   | "not_vegetarian"
   | "not_vegan"

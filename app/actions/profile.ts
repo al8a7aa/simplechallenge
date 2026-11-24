@@ -8,18 +8,25 @@ import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
-import { ALLERGENS, CONDITIONS, DIET_PREFS, GOALS } from "@/lib/nutrition/types";
+import { ACTIVITY_LEVELS, ALLERGENS, CONDITIONS, DIET_PREFS, GOALS } from "@/lib/nutrition/types";
 import { createServerSupabase } from "@/lib/supabase/server";
 
-const optionalInt = (min: number, max: number) =>
-  z.preprocess((v) => (v === "" || v === null || v === undefined ? null : Number(v)), z.number().int().min(min).max(max).nullable());
+const emptyToNull = (v: unknown) => (v === "" || v === null || v === undefined ? null : Number(v));
+const requiredNumber = (min: number, max: number) => z.preprocess(emptyToNull, z.number().min(min).max(max));
+const optionalNumber = (min: number, max: number) => z.preprocess(emptyToNull, z.number().min(min).max(max).nullable());
 
+/**
+ * Body info is required: it drives BMI, daily calories and the personal
+ * limits on the My health page. Target weight is optional.
+ */
 const ProfileInput = z.object({
   full_name: z.string().trim().min(1).max(80),
-  birth_year: optionalInt(1900, new Date().getFullYear()),
-  sex: z.enum(["male", "female"]).nullable().catch(null),
-  height_cm: optionalInt(50, 260),
-  weight_kg: optionalInt(10, 400),
+  birth_year: requiredNumber(1900, new Date().getFullYear()).pipe(z.number().int()),
+  sex: z.enum(["male", "female"]),
+  height_cm: requiredNumber(50, 260),
+  weight_kg: requiredNumber(10, 400),
+  target_weight_kg: optionalNumber(10, 400),
+  activity_level: z.enum(ACTIVITY_LEVELS),
   goal: z.enum(GOALS),
   conditions: z.array(z.enum(CONDITIONS)),
   allergies: z.array(z.enum(ALLERGENS)),
@@ -35,15 +42,17 @@ export async function saveProfile(_prev: SaveProfileState, formData: FormData): 
   const parsed = ProfileInput.safeParse({
     full_name: formData.get("full_name"),
     birth_year: formData.get("birth_year"),
-    sex: formData.get("sex") || null,
+    sex: formData.get("sex"),
     height_cm: formData.get("height_cm"),
     weight_kg: formData.get("weight_kg"),
+    target_weight_kg: formData.get("target_weight_kg"),
+    activity_level: formData.get("activity_level") || "moderate",
     goal: formData.get("goal") || "eat_healthier",
     conditions: formData.getAll("conditions"),
     allergies: formData.getAll("allergies"),
     diet_prefs: formData.getAll("diet_prefs"),
   });
-  if (!parsed.success) return { error: "تحقق من الاسم والأرقام ثم حاول مرة أخرى." };
+  if (!parsed.success) return { error: "بعض البيانات ناقصة أو غير صحيحة. راجع الخطوات ثم احفظ مرة أخرى." };
 
   const db = await createServerSupabase();
   const { error } = await db.from("profiles").upsert({ user_id: userId, ...parsed.data });

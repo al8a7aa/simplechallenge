@@ -45,14 +45,14 @@ export function BarcodeCamera({ onCode, paused }: { onCode: (code: string) => vo
 
   if (cameraError) {
     return (
-      <p className="flex aspect-[4/3] items-center justify-center rounded-card border border-dashed border-charcoal p-6 text-center text-muted">
+      <p className="flex aspect-[4/3] items-center justify-center rounded-card border border-dashed border-fg/20 p-6 text-center text-muted">
         لا يمكن فتح الكاميرا. اسمح للمتصفح باستخدامها، أو اكتب رقم الباركود في الحقل أدناه.
       </p>
     );
   }
 
   return (
-    <div className="relative aspect-[4/3] overflow-hidden rounded-card border border-charcoal bg-ink [container-type:size]">
+    <div className="relative aspect-[4/3] overflow-hidden glass rounded-card [container-type:size]">
       <video ref={videoRef} className="size-full object-cover" muted playsInline aria-label="الكاميرا لقراءة الباركود" />
       <ScanFrame />
       <div className="anim-scanline absolute inset-x-[12%] top-[20%] h-0.5 bg-fg" style={{ ["--travel" as string]: "60cqh" }} aria-hidden />

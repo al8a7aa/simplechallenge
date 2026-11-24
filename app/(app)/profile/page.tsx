@@ -22,7 +22,7 @@ export default async function ProfilePage() {
   const list = (items: string[]) => (items.length ? items.join("، ") : "لا شيء");
 
   return (
-    <Page className="max-w-[720px]">
+    <Page width="medium">
       <PageHeader title="حسابي" description={user?.primaryEmailAddress?.emailAddress} />
 
       <Card className="flex flex-col gap-1 p-5" aria-labelledby="health">
@@ -35,7 +35,7 @@ export default async function ProfilePage() {
             عدّل الملف
           </Link>
         </div>
-        <dl className="divide-y divide-charcoal">
+        <dl className="divide-y divide-fg/10">
           <Row label="الاسم" value={profile.full_name} />
           <Row label="الحالات الصحية" value={list(profile.conditions.map((c) => conditionLabel[c]))} />
           <Row label="الحساسية" value={list(profile.allergies.map((a) => allergenLabel[a]))} />
@@ -50,7 +50,7 @@ export default async function ProfilePage() {
           الحساب
         </h2>
         <SignOutButton redirectUrl="/">
-          <button type="button" className="press flex min-h-12 items-center gap-2 self-start rounded-control border border-charcoal px-5 font-semibold">
+          <button type="button" className="press flex min-h-12 items-center gap-2 self-start glass rounded-full px-5 font-semibold">
             <LogOut size={20} aria-hidden />
             سجّل الخروج
           </button>

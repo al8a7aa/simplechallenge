@@ -25,13 +25,13 @@ export default async function LandingPage() {
 
       <section className="anim-rise flex flex-col items-center gap-6 text-center">
         <Logo size={120} />
-        <h1 className="max-w-xl text-3xl font-semibold leading-snug text-balance sm:text-4xl">
+        <h1 className="max-w-2xl font-display text-[40px] leading-[1.1] font-normal text-balance sm:text-[56px]">
           صوّر أكلك، واعرف إذا كان مناسباً لصحتك
         </h1>
         <p className="max-w-lg text-lg text-muted">
           اختياري يقرأ الملصق أو يتعرّف على الطبق، ويقارنه بحالتك الصحية وحساسيتك وأهدافك، ثم يقترح بديلاً أفضل.
         </p>
-        <Link href="/sign-up" className="press flex min-h-12 items-center rounded-control bg-fg px-8 text-lg font-semibold text-ink">
+        <Link href="/sign-up" className="press flex min-h-14 items-center rounded-full bg-fg px-8 text-lg font-semibold text-ink">
           ابدأ مجاناً
         </Link>
       </section>
@@ -55,11 +55,11 @@ export default async function LandingPage() {
           <VerdictBadge verdict="avoid" long size="lg" />
           <p className="text-muted">سكر 10.6 غ لكل 100 مل، ولديك سكري</p>
           <p className="text-muted">مشروب محلّى يرفع السكر في الدم بسرعة</p>
-          <p className="border-t border-charcoal pt-3">البديل: ماء أو لبن قليل الدسم</p>
+          <p className="border-t border-fg/10 pt-3">البديل: ماء أو لبن قليل الدسم</p>
         </Card>
       </section>
 
-      <footer className="border-t border-charcoal pt-6 text-sm text-muted">
+      <footer className="border-t border-fg/10 pt-6 text-sm text-muted">
         إرشادات عامة، ولا تغني عن استشارة الطبيب أو أخصائي التغذية.
       </footer>
     </main>
@@ -68,7 +68,7 @@ export default async function LandingPage() {
 
 function Step({ icon, title, text }: { icon: React.ReactNode; title: string; text: string }) {
   return (
-    <li className="flex flex-col gap-2 rounded-card border border-charcoal bg-space p-5">
+    <li className="glass flex flex-col gap-2 rounded-card p-5">
       {icon}
       <span className="text-lg font-semibold">{title}</span>
       <span className="text-muted">{text}</span>

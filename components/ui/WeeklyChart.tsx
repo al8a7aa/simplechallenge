@@ -12,7 +12,7 @@ export function WeeklyChart({ days, height = 120 }: { days: DaySummary[]; height
 
   if (total === 0) {
     return (
-      <p className="flex items-center justify-center rounded-control border border-dashed border-charcoal text-muted" style={{ height }}>
+      <p className="flex items-center justify-center rounded-control border border-dashed border-fg/20 text-muted" style={{ height }}>
         ستظهر هنا اختياراتك اليومية بعد أول فحص
       </p>
     );

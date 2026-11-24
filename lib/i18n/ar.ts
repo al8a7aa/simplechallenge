@@ -9,7 +9,7 @@
  * no exclamation marks.
  */
 
-import type { Allergen, Category, Condition, DietPref, Goal, Reason, ReasonKey, Verdict } from "@/lib/nutrition/types";
+import type { ActivityLevel, Allergen, Category, Condition, DietPref, Goal, Reason, ReasonKey, Verdict } from "@/lib/nutrition/types";
 
 export const verdictLabel: Record<Verdict, string> = {
   good: "مناسب لك",
@@ -35,11 +35,13 @@ export function scoreLabel(score: number): string {
 const reasonText: Record<ReasonKey, (v?: number) => string> = {
   allergen: () => "يحتوي على مادة لديك حساسية منها",
   gluten_celiac: () => "يحتوي على الغلوتين، ولديك حساسية القمح (سيلياك)",
+  lactose: () => "يحتوي على الحليب، ولديك عدم تحمّل اللاكتوز",
+  nutrition_unknown: () => "القيم الغذائية غير متوفرة، فالحكم مبني على المكونات فقط",
   not_halal: () => "يحتوي على مكوّن غير حلال",
   not_vegetarian: () => "يحتوي على لحوم أو مشتقاتها",
   not_vegan: () => "يحتوي على مكوّن من مصدر حيواني",
   high_sugar: (v) => `سكر عالٍ: ${v} غ لكل 100 غ`,
-  high_sugar_diabetes: (v) => `سكر ${v} غ لكل 100 غ، ولديك سكري`,
+  high_sugar_diabetes: (v) => `سكر ${v} غ لكل 100 غ، وحالتك تتطلب سكراً أقل`,
   sugary_drink_diabetes: () => "مشروب محلّى يرفع السكر في الدم بسرعة",
   medium_sugar: (v) => `سكر متوسط: ${v} غ لكل 100 غ`,
   high_salt: (v) => `ملح عالٍ: ${v} غ لكل 100 غ`,
@@ -79,12 +81,16 @@ export const categoryLabel: Record<Category, string> = {
 
 export const conditionLabel: Record<Condition, string> = {
   diabetes: "السكري",
+  prediabetes: "مقدمات السكري",
   hypertension: "ضغط الدم المرتفع",
   high_cholesterol: "الكوليسترول",
-  celiac: "حساسية القمح (سيلياك)",
-  kidney: "أمراض الكلى",
   heart: "أمراض القلب",
-  pregnancy: "الحمل",
+  kidney: "أمراض الكلى",
+  fatty_liver: "الكبد الدهني",
+  pcos: "تكيّس المبايض",
+  celiac: "حساسية القمح (سيلياك)",
+  lactose_intolerance: "عدم تحمّل اللاكتوز",
+  pregnancy: "الحمل أو الرضاعة",
 };
 
 export const allergenLabel: Record<Allergen, string> = {
@@ -111,6 +117,14 @@ export const goalLabel: Record<Goal, string> = {
   maintain: "الحفاظ على الوزن",
   gain_muscle: "بناء العضلات",
   eat_healthier: "أكل صحي أكثر",
+};
+
+export const activityLabel: Record<ActivityLevel, { name: string; hint: string }> = {
+  sedentary: { name: "قليل الحركة", hint: "عمل مكتبي، بلا رياضة" },
+  light: { name: "نشاط خفيف", hint: "رياضة 1–3 أيام في الأسبوع" },
+  moderate: { name: "نشاط متوسط", hint: "رياضة 3–5 أيام في الأسبوع" },
+  active: { name: "نشيط", hint: "رياضة 6–7 أيام في الأسبوع" },
+  very_active: { name: "نشيط جداً", hint: "عمل بدني أو تمرين مرتين يومياً" },
 };
 
 export const levelLabel = { low: "منخفض", medium: "متوسط", high: "عالٍ" } as const;

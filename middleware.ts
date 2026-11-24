@@ -2,9 +2,10 @@ import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 
 /**
  * Everything requires sign-in except these routes.
- * The Motion Lab is public so animations can be reviewed without an account.
+ * The Motion Lab and the sample-data /preview pages are public so the design
+ * can be reviewed without an account.
  */
-const isPublicRoute = createRouteMatcher(["/", "/sign-in(.*)", "/sign-up(.*)", "/motion(.*)"]);
+const isPublicRoute = createRouteMatcher(["/", "/sign-in(.*)", "/sign-up(.*)", "/motion(.*)", "/preview(.*)"]);
 
 export default clerkMiddleware(async (auth, request) => {
   if (!isPublicRoute(request)) await auth.protect();

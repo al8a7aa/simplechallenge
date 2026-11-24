@@ -3,7 +3,8 @@
 /**
  * Server Actions for the scan flow.
  *
- *   analyzePhoto(formData)  photo → Claude → product → personal scan
+ *   analyzePhoto(formData)  1–3 photos (product / nutrition table /
+ *                           ingredients) → Claude → product → personal scan
  *   scanBarcode(code)       barcode → our cache / Open Food Facts → scan
  *   scanExisting(id)        a product picked from search or an alternative
  *   chooseAlternative(...)  records a healthy swap
@@ -14,7 +15,7 @@
 
 import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
-import { analyzeFoodPhoto, PhotoAnalysisError, type FoodPhoto } from "@/lib/ai/analyze-photo";
+import { analyzeFoodPhotos, PhotoAnalysisError, type FoodPhoto, type PhotoInput, type PhotoRole } from "@/lib/ai/analyze-photo";
 import { toFoodItem, toHealthProfile, type NewProductRow, type ProductRow } from "@/lib/data/mappers";
 import { findAlternative, getProfile } from "@/lib/data/queries";
 import { scoreFood } from "@/lib/nutrition/scoring";
@@ -25,24 +26,35 @@ export type ScanResult =
   | { ok: true; productId: string }
   | { ok: false; error: "not_found" | "not_food" | "unreadable" | "too_many" | "invalid" | "service" | "no_profile" };
 
-const MAX_PHOTO_BYTES = 5 * 1024 * 1024;
+const MAX_PHOTO_BYTES = 4 * 1024 * 1024; // per photo; three fit the 6 MB action limit after resizing
 const PHOTO_SCANS_PER_DAY = 30;
 const ACCEPTED_TYPES = ["image/jpeg", "image/png", "image/webp"] as const;
 type AcceptedType = (typeof ACCEPTED_TYPES)[number];
 
+const ROLES: PhotoRole[] = ["product", "nutrition", "ingredients"];
+
+/**
+ * Form fields: `photo_product`, `photo_nutrition`, `photo_ingredients`
+ * (any one to all three). Each is a resized JPEG from the browser.
+ */
 export async function analyzePhoto(formData: FormData): Promise<ScanResult> {
   const { userId } = await auth.protect();
 
-  const file = formData.get("photo");
-  if (!(file instanceof File) || file.size === 0 || file.size > MAX_PHOTO_BYTES) return { ok: false, error: "invalid" };
-  if (!ACCEPTED_TYPES.includes(file.type as AcceptedType)) return { ok: false, error: "invalid" };
+  const photos: PhotoInput[] = [];
+  for (const role of ROLES) {
+    const file = formData.get(`photo_${role}`);
+    if (file === null) continue;
+    if (!(file instanceof File) || file.size === 0 || file.size > MAX_PHOTO_BYTES) return { ok: false, error: "invalid" };
+    if (!ACCEPTED_TYPES.includes(file.type as AcceptedType)) return { ok: false, error: "invalid" };
+    photos.push({ role, mediaType: file.type as AcceptedType, base64: Buffer.from(await file.arrayBuffer()).toString("base64") });
+  }
+  if (photos.length === 0) return { ok: false, error: "invalid" };
 
   if ((await photoScansToday()) >= PHOTO_SCANS_PER_DAY) return { ok: false, error: "too_many" };
 
   let photo: FoodPhoto;
   try {
-    const base64 = Buffer.from(await file.arrayBuffer()).toString("base64");
-    photo = await analyzeFoodPhoto({ base64, mediaType: file.type as AcceptedType });
+    photo = await analyzeFoodPhotos(photos);
   } catch (error) {
     if (error instanceof PhotoAnalysisError) {
       return { ok: false, error: error.code === "not_food" ? "not_food" : error.code === "service" ? "service" : "unreadable" };

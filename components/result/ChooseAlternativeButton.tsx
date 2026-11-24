@@ -20,7 +20,7 @@ export function ChooseAlternativeButton({ fromProductId, alternativeId }: { from
           if (result.ok) router.push(`/product/${result.productId}`, "zoom");
         })
       }
-      className="press flex min-h-12 items-center justify-center gap-2 rounded-control bg-fg px-5 font-semibold text-ink disabled:opacity-60"
+      className="press flex min-h-12 items-center justify-center gap-2 rounded-full bg-fg px-5 font-semibold text-ink disabled:opacity-60"
     >
       <ArrowLeftRight size={20} aria-hidden />
       {pending ? "جارٍ الحفظ…" : "اختر هذا البديل"}

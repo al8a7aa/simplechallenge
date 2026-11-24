@@ -15,6 +15,8 @@
  *   4. Personal    — penalties are multiplied for the person's conditions
  *                    (e.g. sugar ×2 for diabetes, salt ×2 for hypertension).
  *   5. Verdict     — ≥70 good · 40–69 moderate · <40 avoid.
+ *                    With no nutrition data at all (an ingredients-only
+ *                    photo) the verdict is at best "moderate".
  *
  * This is general guidance, not medical advice (shown in the UI).
  */
@@ -78,12 +80,20 @@ export function scoreFood(item: FoodItem, profile: HealthProfile): ScoreResult {
     if (key) reasons.push({ key, value: round1(value), impact: penalty, positive: false });
   };
 
-  const sugarX = has("diabetes") ? 2 : 1;
+  // Conditions where blood sugar control matters.
+  const sugarSensitive = has("diabetes") || has("prediabetes") || has("pcos") || has("fatty_liver");
+  const sugarX = sugarSensitive ? 2 : 1;
   const saltX = has("hypertension") || has("kidney") || has("heart") ? 2 : 1;
-  const satFatX = has("high_cholesterol") || has("heart") ? 2 : 1;
+  const satFatX = has("high_cholesterol") || has("heart") || has("fatty_liver") ? 2 : 1;
 
   // For diabetes any sugar above "low" counts as high.
   penalize("sugar", n.sugarG, sugarX, { high: "high_sugar", personal: "high_sugar_diabetes", medium: "medium_sugar" }, has("diabetes"));
+
+  // Lactose intolerance: milk is uncomfortable, not dangerous — a penalty, not a hard stop.
+  if (has("lactose_intolerance") && item.allergens.includes("milk") && !profile.allergies.includes("milk")) {
+    score -= 25;
+    reasons.push({ key: "lactose", impact: 25, positive: false });
+  }
   penalize("salt", n.saltG, saltX, { high: "high_salt", personal: "high_salt_condition", medium: "medium_salt" });
   penalize("satFat", n.satFatG, satFatX, { high: "high_sat_fat", personal: "high_sat_fat_condition", medium: "medium_sat_fat" });
   penalize("fat", n.fatG, 1, { high: "high_fat" });
@@ -129,6 +139,13 @@ export function scoreFood(item: FoodItem, profile: HealthProfile): ScoreResult {
 
   score = clamp(Math.round(score), 0, 100);
   if (hardStops.length > 0) score = Math.min(score, HARD_STOP_CAP);
+
+  // Without any nutrition data we can't call a food "good".
+  const nutritionKnown = Object.values(levels).some((level) => level !== null);
+  if (!nutritionKnown && hardStops.length === 0) {
+    score = Math.min(score, VERDICT_THRESHOLDS.good - 1);
+    reasons.push({ key: "nutrition_unknown", impact: 5, positive: false });
+  }
 
   return {
     score,

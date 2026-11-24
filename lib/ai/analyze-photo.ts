@@ -6,11 +6,13 @@ import { z } from "zod";
 import { ALLERGENS, CATEGORIES } from "@/lib/nutrition/types";
 
 /**
- * Reads a food photo with Claude (vision) and returns structured nutrition.
+ * Reads food photos with Claude (vision) and returns structured nutrition.
  *
- * Works for both cases the scan screen supports:
- *  - a packaged product (front of pack or the nutrition label), and
- *  - a plated meal (Cal AI style), where values are estimates.
+ * The scan screen sends one to three photos, each tagged with its role:
+ *  - "product"      the whole product or a plated meal (values may be estimates),
+ *  - "nutrition"    the nutrition facts table (values are copied),
+ *  - "ingredients"  the ingredients list (allergens, additives, halal).
+ * Several photos of the same product are read together as one product.
  *
  * The response is constrained with Structured Outputs, so `parsed_output`
  * always matches `FoodPhotoSchema` or is null.
@@ -55,9 +57,25 @@ const SYSTEM_PROMPT = `You read photos of food for a nutrition app used in the G
 
 For a nutrition label or package: copy the printed values. Convert per-serving values to per 100 g (or per 100 ml for drinks) using the serving size. If only sodium is printed, salt = sodium × 2.5. Read Arabic and English labels. Confidence is "high" when the values are printed and legible.
 
+For an ingredients list only: fill ingredients, allergens, additives, halal and animal fields; leave nutrition null unless it is printed.
+
 For a plated meal or unpackaged food: identify the dish (regional dishes such as kabsa, mandi, harees, shawarma are common), estimate the portion in grams and typical nutrition per 100 g. Confidence is "medium" for a clearly identifiable dish and "low" otherwise.
 
 Use null for anything you cannot read or reasonably estimate. Never invent a barcode or a brand.`;
+
+export type PhotoRole = "product" | "nutrition" | "ingredients";
+
+export interface PhotoInput {
+  base64: string;
+  mediaType: "image/jpeg" | "image/png" | "image/webp";
+  role: PhotoRole;
+}
+
+const ROLE_TEXT: Record<PhotoRole, string> = {
+  product: "Photo of the whole product or meal.",
+  nutrition: "Photo of the nutrition facts table: copy its values.",
+  ingredients: "Photo of the ingredients list: use it for allergens, additives, halal and animal ingredients.",
+};
 
 export class PhotoAnalysisError extends Error {
   constructor(
@@ -71,10 +89,20 @@ export class PhotoAnalysisError extends Error {
 let client: Anthropic | null = null;
 const getClient = () => (client ??= new Anthropic()); // reads ANTHROPIC_API_KEY
 
-export async function analyzeFoodPhoto(image: {
-  base64: string;
-  mediaType: "image/jpeg" | "image/png" | "image/webp";
-}): Promise<FoodPhoto> {
+export async function analyzeFoodPhotos(photos: PhotoInput[]): Promise<FoodPhoto> {
+  // Each image is preceded by a short caption saying what it shows.
+  const content: Anthropic.Beta.BetaContentBlockParam[] = photos.flatMap((photo, i) => [
+    { type: "text" as const, text: `Photo ${i + 1}: ${ROLE_TEXT[photo.role]}` },
+    { type: "image" as const, source: { type: "base64" as const, media_type: photo.mediaType, data: photo.base64 } },
+  ]);
+  content.push({
+    type: "text",
+    text:
+      photos.length > 1
+        ? "All photos show the same product. Combine them into one result."
+        : "Read this food photo.",
+  });
+
   let response;
   try {
     response = await getClient().beta.messages.parse({
@@ -85,15 +113,7 @@ export async function analyzeFoodPhoto(image: {
       fallbacks: "default",
       output_config: { effort: "medium", format: betaZodOutputFormat(FoodPhotoSchema) },
       system: SYSTEM_PROMPT,
-      messages: [
-        {
-          role: "user",
-          content: [
-            { type: "image", source: { type: "base64", media_type: image.mediaType, data: image.base64 } },
-            { type: "text", text: "Read this food photo." },
-          ],
-        },
-      ],
+      messages: [{ role: "user", content }],
     });
   } catch (error) {
     if (error instanceof Anthropic.RateLimitError) {
