@@ -128,7 +128,7 @@ supabase/                 Schema with Row Level Security, seed data
 
 ## Motion
 
-All animations live in `app/globals.css`, each with a comment saying where it's used and how long it runs. Open **`/motion`** to play every one.
+All animations live in `app/globals.css`, each with a comment saying where it's used and how long it runs. Open **`/motion`** to play every one, or watch the recording: [`docs/motion-demo.mp4`](docs/motion-demo.mp4).
 
 **Logo launch (splash).** Your logo is drawn as SVG, so each part animates on its own. The cart outline draws itself, then the wheels pop in and the leaf grows into the basket, then the check badge pops and the check draws, and finally the name rises. The splash fades out at 1.9s. It plays once per session (a tiny inline script prevents any flash on return visits) and is skipped when the device asks for reduced motion.
 
