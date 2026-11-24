@@ -1,0 +1,453 @@
+/*
+ * Ikhtiyari global styles
+ * ───────────────────────
+ * 1. Design tokens (colors, radius, motion) — the single source of truth.
+ * 2. Base styles (RTL, focus ring, scrollbars).
+ * 3. Animation library — every animation in the app is defined here and
+ *    named `anim-*`. Each one is documented with: where it is used, its
+ *    duration token, and its reduced-motion fallback.
+ *    The Motion Lab page (/motion) has a play button for every entry.
+ * 4. Page transitions — `page-enter--*` classes used by <PageTransition>.
+ * 5. Splash (logo launch animation).
+ *
+ * Rules (from .ux-profile.md):
+ * - Only the three brand colors for surfaces. Verdict colors are status-only.
+ * - Animate only `transform` and `opacity` (cheap, no layout shift),
+ *   except SVG stroke drawing which animates `stroke-dashoffset`.
+ * - Every animation collapses to "no motion" under prefers-reduced-motion.
+ */
+
+@import "tailwindcss";
+
+/* ───────────────────────── 1. Design tokens ───────────────────────── */
+
+@theme {
+  /* Brand — the only three surface colors. */
+  --color-ink: #11151c; /* page background */
+  --color-space: #212d40; /* cards, sheets, navigation */
+  --color-charcoal: #364156; /* borders, chips, active tab, chart track */
+
+  /* Text (AAA on every brand surface except muted-on-charcoal). */
+  --color-fg: #f3f5f9;
+  --color-muted: #b9c3d3;
+
+  /* Verdict status colors — only for verdicts, pills and the chart. */
+  --color-good: #86efac;
+  --color-moderate: #fcd34d;
+  --color-avoid: #fca5a5;
+
+  --font-sans: var(--font-plex-arabic), "IBM Plex Sans Arabic", system-ui, sans-serif;
+
+  --radius-card: 16px;
+  --radius-control: 12px;
+}
+
+:root {
+  /* Motion tokens. Use these instead of raw numbers. */
+  /* Durations follow the 100 / 150 / 200 / 300ms scale. */
+  --dur-instant: 100ms; /* press feedback */
+  --dur-fast: 150ms; /* small UI changes, fades */
+  --dur-base: 200ms; /* page transitions, sheets, content appearing */
+  --dur-slow: 300ms; /* reveals: verdict card, chart, ring, progress */
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1); /* enter: ease-out */
+  --ease-exit: cubic-bezier(0.4, 0, 1, 1); /* exit: ease-in */
+
+  color-scheme: dark;
+}
+
+/* ───────────────────────── 2. Base ───────────────────────── */
+
+html,
+body {
+  background: var(--color-ink);
+  color: var(--color-fg);
+}
+
+body {
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* AAA focus ring: 3px, high contrast, offset so it never hides content. */
+:where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+  outline: 3px solid var(--color-fg);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+/* Hide the number spinners on inputs (icon bloat ban). */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* ───────────────────────── 3. Animation library ───────────────────────── */
+
+/*
+ * anim-pop — Verdict card reveal on the Result page.
+ * Scales up from 92% while fading in. 300ms, ease-out (no bounce).
+ */
+@keyframes pop {
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+.anim-pop {
+  animation: pop var(--dur-slow) var(--ease-standard) both;
+}
+
+/*
+ * anim-rise — Generic "content appears" (cards, sections).
+ * Fades in while moving up 12px. 200ms, ease-out.
+ */
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.anim-rise {
+  animation: rise var(--dur-base) var(--ease-standard) both;
+}
+
+/*
+ * anim-stagger — Lists (recent scans, history, reasons).
+ * Each direct child rises in turn, 30ms apart, capped at 180ms total so
+ * long lists never feel slow.
+ */
+.anim-stagger > * {
+  animation: rise var(--dur-base) var(--ease-standard) both;
+}
+.anim-stagger > :nth-child(1) { animation-delay: 0ms; }
+.anim-stagger > :nth-child(2) { animation-delay: 30ms; }
+.anim-stagger > :nth-child(3) { animation-delay: 60ms; }
+.anim-stagger > :nth-child(4) { animation-delay: 90ms; }
+.anim-stagger > :nth-child(5) { animation-delay: 120ms; }
+.anim-stagger > :nth-child(6) { animation-delay: 150ms; }
+.anim-stagger > :nth-child(n + 7) { animation-delay: 180ms; }
+
+/*
+ * anim-grow-y — Chart bars on the Dashboard grow from the baseline.
+ * 300ms, ease-out. Set `--delay` per bar for a left-to-right wave.
+ */
+@keyframes grow-y {
+  from {
+    transform: scaleY(0);
+  }
+  to {
+    transform: scaleY(1);
+  }
+}
+.anim-grow-y {
+  transform-origin: bottom;
+  animation: grow-y var(--dur-slow) var(--ease-standard) both;
+  animation-delay: var(--delay, 0ms);
+}
+
+/*
+ * anim-grow-x — Progress bars (weekly goal) fill from the start edge.
+ * In RTL the start edge is the right. 300ms, ease-out.
+ */
+@keyframes grow-x {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+.anim-grow-x {
+  transform-origin: right;
+  animation: grow-x var(--dur-slow) var(--ease-standard) both;
+}
+[dir="ltr"] .anim-grow-x {
+  transform-origin: left;
+}
+
+/*
+ * anim-ring — Score ring fills to its value.
+ * The SVG circle uses pathLength="100"; set `--value` (0–100) on it.
+ * 300ms, ease-out.
+ */
+@keyframes ring-fill {
+  from {
+    stroke-dashoffset: 100;
+  }
+}
+.anim-ring {
+  stroke-dasharray: 100;
+  stroke-dashoffset: calc(100 - var(--value, 0));
+  animation: ring-fill var(--dur-slow) var(--ease-standard) both;
+}
+
+/*
+ * anim-draw — Any SVG stroke draws itself (success check, logo parts).
+ * The path must have pathLength="1". 300ms, ease-out.
+ */
+@keyframes draw {
+  from {
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+.anim-draw {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: draw var(--dur-slow) var(--ease-standard) forwards;
+  animation-delay: var(--delay, 0ms);
+}
+
+/*
+ * anim-shake — Error feedback (photo could not be read, bad barcode).
+ * Small horizontal shake, 300ms. Never used for anything but errors.
+ */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-6px); }
+  40% { transform: translateX(6px); }
+  60% { transform: translateX(-4px); }
+  80% { transform: translateX(4px); }
+}
+.anim-shake {
+  animation: shake var(--dur-slow) var(--ease-standard);
+}
+
+/*
+ * anim-toast — Toast slides in from the bottom, holds, then leaves.
+ * Total 3.2s: ~200ms in, hold, ~200ms out.
+ */
+@keyframes toast {
+  0% { opacity: 0; transform: translateY(16px); }
+  6% { opacity: 1; transform: translateY(0); }
+  94% { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(16px); }
+}
+.anim-toast {
+  animation: toast 3200ms var(--ease-standard) both;
+}
+
+/*
+ * anim-sheet — Bottom sheet slides up (scan options, filters on phone).
+ * 200ms, ease-out. Its backdrop uses anim-fade.
+ */
+@keyframes sheet-up {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+.anim-sheet {
+  animation: sheet-up var(--dur-base) var(--ease-standard) both;
+}
+
+/* anim-fade — Plain opacity fade (backdrops, overlays). 150ms. */
+@keyframes fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.anim-fade {
+  animation: fade var(--dur-fast) var(--ease-standard) both;
+}
+
+/*
+ * anim-scanline — The line that sweeps the camera frame while a photo is
+ * being analyzed. A loader, not decoration: loops every 1.6s only until
+ * the analysis finishes.
+ */
+@keyframes scanline {
+  0% { transform: translateY(0); opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { transform: translateY(var(--travel, 240px)); opacity: 0; }
+}
+.anim-scanline {
+  animation: scanline 1600ms var(--ease-standard) infinite;
+}
+
+/*
+ * anim-shimmer — Skeleton loaders (content that takes >1s).
+ * A soft light band moves across the placeholder. 1.4s loop.
+ */
+@keyframes shimmer {
+  from { background-position: 150% 0; }
+  to { background-position: -50% 0; }
+}
+.anim-shimmer {
+  background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgb(243 245 249 / 0.08) 50%,
+      transparent 100%
+    )
+    var(--color-charcoal);
+  background-size: 200% 100%;
+  animation: shimmer 1400ms linear infinite;
+}
+
+/*
+ * press — Every button scales down slightly while pressed (100ms).
+ * Gives instant feedback on touch screens.
+ */
+.press {
+  transition: transform var(--dur-instant) var(--ease-standard);
+}
+.press:active {
+  transform: scale(0.97);
+}
+
+/* ───────────────────────── 4. Page transitions ───────────────────────── */
+/*
+ * <PageTransition> (components/motion/PageTransition.tsx) wraps every page
+ * and adds one of these classes when the page mounts. The type is chosen by
+ * the link that started the navigation (<TransitionLink transition="...">).
+ *
+ *   fade       — default between tabs. 150ms.
+ *   forward    — going deeper (list → detail). Slides in from the reading
+ *                direction's end: from the left in Arabic (RTL). 200ms.
+ *   back       — returning. Slides in from the opposite side. 200ms.
+ *   rise       — opening something "on top" (scan → result). 200ms.
+ *   zoom       — the verdict reveal after a scan. 300ms.
+ *   none       — no animation.
+ */
+@keyframes page-fade {
+  from { opacity: 0; }
+}
+@keyframes page-forward {
+  from { opacity: 0; transform: translateX(calc(-32px * var(--dir))); }
+}
+@keyframes page-back {
+  from { opacity: 0; transform: translateX(calc(32px * var(--dir))); }
+}
+@keyframes page-rise {
+  from { opacity: 0; transform: translateY(32px); }
+}
+@keyframes page-zoom {
+  from { opacity: 0; transform: scale(0.94); }
+}
+
+/* --dir flips horizontal slides for LTR (English). */
+[dir="rtl"] { --dir: 1; }
+[dir="ltr"] { --dir: -1; }
+
+/*
+ * fill-mode is `backwards`, not `both`: once the animation ends the page has
+ * no transform left. A lingering transform would make the page the
+ * containing block for every `position: fixed` element inside it.
+ */
+.page-enter--fade { animation: page-fade var(--dur-fast) var(--ease-standard) backwards; }
+.page-enter--forward { animation: page-forward var(--dur-base) var(--ease-standard) backwards; }
+.page-enter--back { animation: page-back var(--dur-base) var(--ease-standard) backwards; }
+.page-enter--rise { animation: page-rise var(--dur-base) var(--ease-standard) backwards; }
+.page-enter--zoom { animation: page-zoom var(--dur-slow) var(--ease-standard) backwards; }
+.page-enter--none { animation: none; }
+
+/* ───────────────────────── 5. Splash (logo launch) ───────────────────────── */
+/*
+ * Brand exception: the launch sequence runs 1.9s in total, longer than the
+ * UI duration scale. It plays once per session, never blocks input, and is
+ * skipped under reduced motion. Each part still animates in ≤550ms.
+ *
+ * Timeline (total 1.9s), see components/brand/SplashScreen.tsx:
+ *   0–550ms     cart outline draws itself
+ *   200–600ms   top rail draws
+ *   500–800ms   wheels pop in (staggered)
+ *   650–1000ms  leaf grows into the basket
+ *   950–1300ms  check badge pops, then the check draws
+ *   1150–1500ms wordmark rises
+ *   1600–1900ms whole splash fades out
+ *
+ * The same part animations run inside any `.logo-anim` wrapper, which the
+ * Motion Lab uses to replay the launch inside a card.
+ *
+ * The splash only plays once per browser session. An inline script in
+ * app/layout.tsx sets html[data-splash="done"] before first paint when it
+ * has already played, so returning users never see a flash.
+ */
+.splash {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  background: var(--color-ink);
+  animation: fade-out 300ms var(--ease-exit) 1600ms forwards;
+}
+@keyframes fade-out {
+  to { opacity: 0; visibility: hidden; }
+}
+html[data-splash="done"] .splash:not(.splash--replay) {
+  display: none;
+}
+
+:is(.splash, .logo-anim) .logo-cart,
+:is(.splash, .logo-anim) .logo-rail,
+:is(.splash, .logo-anim) .logo-check {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: draw var(--ease-standard) forwards;
+}
+:is(.splash, .logo-anim) .logo-cart { animation-duration: 550ms; }
+:is(.splash, .logo-anim) .logo-rail { animation-duration: 400ms; animation-delay: 200ms; }
+:is(.splash, .logo-anim) .logo-check { animation-duration: 250ms; animation-delay: 1100ms; }
+
+:is(.splash, .logo-anim) .logo-wheel,
+:is(.splash, .logo-anim) .logo-badge {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: pop-in cubic-bezier(0.3, 0, 0, 1.25) both; /* brand-only overshoot */
+}
+:is(.splash, .logo-anim) .logo-wheel { animation-duration: 300ms; animation-delay: 500ms; }
+:is(.splash, .logo-anim) .logo-wheel + .logo-wheel { animation-delay: 560ms; }
+:is(.splash, .logo-anim) .logo-badge { animation-duration: 350ms; animation-delay: 950ms; }
+
+@keyframes pop-in {
+  from { opacity: 0; transform: scale(0); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+:is(.splash, .logo-anim) .logo-leaf {
+  transform-box: fill-box;
+  transform-origin: 0% 100%; /* grows from its stem */
+  animation: leaf-grow 350ms cubic-bezier(0.3, 0, 0, 1.25) 650ms both; /* brand-only overshoot */
+}
+@keyframes leaf-grow {
+  from { opacity: 0; transform: scale(0.3) rotate(-25deg); }
+  to { opacity: 1; transform: scale(1) rotate(0); }
+}
+
+:is(.splash, .logo-anim) .logo-wordmark {
+  animation: rise 350ms var(--ease-standard) 1150ms both;
+}
+
+/* ───────────────────────── Reduced motion ───────────────────────── */
+/*
+ * Users who ask their OS for less motion get the final state instantly.
+ * The splash is skipped entirely; loops (scan line, shimmer) stop.
+ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    animation-delay: 0ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important;
+  }
+  .splash {
+    display: none;
+  }
+  .anim-scanline {
+    display: none;
+  }
+}
