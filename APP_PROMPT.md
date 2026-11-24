@@ -361,18 +361,19 @@ The dashboard must be readable **at a glance by anyone, including elderly users*
 
 **Visual rules:**
 - Minimum body text 16px; key numbers 32–48px bold.
-- **The app uses 3 main colors** (define them as CSS variables / Tailwind theme tokens and use nothing else for UI):
+- **The app uses 3 main colors and is dark-only** (define them as CSS variables / Tailwind theme tokens and use nothing else for UI). Full rules are in `.ux-profile.md`.
 
-  | Role | Name | Light | Dark mode | Used for |
-  |---|---|---|---|---|
-  | Primary (60%) | Mint White | `#F5F8F6` | `#0E1512` | Page background, cards (cards use pure white `#FFFFFF` / `#16201C`) |
-  | Secondary (30%) | Deep Olive Green | `#0F6B57` | `#4FC3A1` | Logo, buttons, links, active nav tab, score ring, headings accent |
-  | Accent (10%) | Date Gold | `#E0A526` | `#F2B941` | Highlights only: streaks, badges, "Healthy swap" button, tip card icon |
+  | Token | Hex | Used for |
+  |---|---|---|
+  | `--ink-black` | `#11151C` | Page background, text on primary buttons |
+  | `--deep-space-blue` | `#212D40` | Cards, sheets, bottom navigation |
+  | `--charcoal-blue` | `#364156` | Borders, dividers, inputs, chips, active nav tab, chart track |
 
-  Text is near-black `#15201B` (light) / `#E6EEEA` (dark); muted text `#5B6B63` / `#9AABA3`.
-- **Verdict colors are status signals, not brand colors.** Use them only on verdict badges, the verdict card, traffic-light pills and the dashboard chart — always paired with an icon + word (never color alone, for color-blind users):
-  - Good: green `#16A34A` · Moderate: amber `#D97706` · Avoid: red `#DC2626`
-- White cards with a soft border, 16px radius, generous spacing (8-pt grid).
+  Text `#F3F5F9`; muted text `#B9C3D3` (never on charcoal blue). Primary buttons are filled `#F3F5F9` with `#11151C` text.
+- **Verdict colors are status signals, not brand colors.** Use them only on verdict badges, the verdict card, traffic-light pills and the dashboard chart, always paired with a Lucide icon and a word (never color alone, never emoji):
+  - Good `#86EFAC` · Moderate `#FCD34D` · Avoid `#FCA5A5` (all pass WCAG AAA 7:1 on cards)
+- Accessibility target is **WCAG 2.1 AAA**: 7:1 text contrast, 48px touch targets, visible focus outlines.
+- Cards with a 1px charcoal-blue border, 16px radius, generous spacing (8-pt grid). No emoji anywhere in the UI.
 - Maximum 7 blocks on the screen; no tables on the dashboard.
 - Use Arabic-Indic or Western numerals based on the locale.
 - Support dark mode via `prefers-color-scheme` and a toggle.
